@@ -1,5 +1,5 @@
 # Step 1: Build the Angular application
-FROM node:20 as build
+FROM node:20.15.0 as build
 
 WORKDIR /app
 
@@ -7,7 +7,8 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build --prod
+RUN npm run build --configuration production  
+# Updated to use --configuration production
 
 # Step 2: Serve the application using nginx
 FROM nginx:alpine
