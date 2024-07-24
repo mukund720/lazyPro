@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '20'  # Updated to use Node.js 20
 
       - name: Install dependencies
         run: npm install
@@ -34,10 +34,10 @@ jobs:
         run: npm run build --prod
 
       - name: Docker build
-        run: docker build -t mukund720/lazy-pro:latest .
+        run: docker build -t  "${{ secrets.DOCKERHUB_USERNAME }}"/lazy-pro:latest .
 
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Push to DockerHub
-        run: docker push mukund720/lazy-pro:latest
+        run: docker push  "${{ secrets.DOCKERHUB_USERNAME }}"/lazy-pro:latest
