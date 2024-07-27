@@ -1,43 +1,78 @@
 name: CI/CD Pipeline
 
 on:
+  # Trigger the workflow on pushes to the main branch
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
 jobs:
   build:
+    # Define the runner environment for the job
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      # Set up Node.js environment
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.15.0'
+          # Use Node.js version 20
+          node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      # Set execute permissions for script files
+      - name: Set execute permissions
+        run: |
+          chmod +x scripts/build-angular.sh
+          chmod +x scripts/build-docker-image.sh
+          chmod +x scripts/deploy.sh
 
-      - name: Run lint
-        run: npm run lint
-
-      - name: Run tests
-        run: npm run test -- --watch=false
-
+      # Build the Angular application
       - name: Build Angular app
-        run: npm run build --configuration production  # Updated to use --configuration production
+        run: ./scripts/build-angular.sh
 
-      - name: Docker build
-        run: docker build -t "${{ secrets.DOCKERHUB_USERNAME }}/lazy-pro:latest" .
+      # Build the Docker image using the script
+      - name: Build Docker image
+        run: ./scripts/build-docker-image.sh
+        env:
+          # Pass Docker username as an environment variable
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
-      - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      # Log in to Docker Hub with the provided credentials
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push to DockerHub
-        run: docker push "${{ secrets.DOCKERHUB_USERNAME }}/lazy-pro:latest"
+      # Push the Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/lazy-pro:latest
+
+      # Upload the build artifacts (e.g., Angular dist files) for further use or archiving
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/lazy-pro
+
+  # Optional: Uncomment and configure the deploy step if needed
+  # Deploy the Docker image to an EC2 instance or another environment
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set execute permissions
+        run: chmod +x scripts/deploy.sh
+
+      - name: Deploy to EC2
+        run: ./scripts/deploy.sh ${{ secrets.EC2_HOST }} ${{ secrets.EC2_USER }} ${{ secrets.EC2_SSH_KEY }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
