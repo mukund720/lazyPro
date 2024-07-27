@@ -51,7 +51,7 @@ jobs:
 
           echo "Searching for build-artifacts directory:"
           find . -type d -name 'build-artifacts' || echo "Directory build-artifacts does not exist"
-          find . -type d -name 'dist' || echo "Directory dist does not exist"
+        # find . -type d -name 'dist' || echo "Directory dist does not exist"
 
 
       - name: Set execute permissions
