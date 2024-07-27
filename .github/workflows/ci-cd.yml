@@ -44,8 +44,12 @@ jobs:
         with:
           name: build-artifacts
 
-      - name: List build artifacts directory
-        run: ls -la build-artifacts
+      - name: List downloaded files
+        run: |
+          echo "Listing files in the current directory:"
+          ls -la
+          echo "Listing files in the build-artifacts directory:"
+          ls -la build-artifacts || echo "Directory build-artifacts does not exist"
 
       - name: Set execute permissions
         run: chmod +x scripts/deploy.sh
