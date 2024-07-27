@@ -13,7 +13,7 @@ PORT=$4         # Port number for SSH
 REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/cicd
 
 # Directory of the build artifacts
-LOCAL_BUILD_DIR=/home/runner/work/lazyPro/lazyPro/dist/lazy-pro
+LOCAL_BUILD_DIR=dist/lazy-pro
 
 # Print debug information
 echo "Deploying to Hostinger..."
