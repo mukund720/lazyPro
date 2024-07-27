@@ -3,28 +3,27 @@
 # Exit on error
 set -e
 
-# Variables for EC2 deployment
-EC2_HOST=$1      # EC2 instance hostname or IP
-EC2_USER=$2      # EC2 user (e.g., ec2-user or ubuntu)
-EC2_SSH_KEY=$3   # Path to the SSH private key for EC2 access
+# Variables for Hostinger deployment
+HOST=$1         # Hostinger hostname or IP
+USER=$2         # Hostinger user (e.g., cpanel_username)
+SSH_KEY=$3      # Path to the SSH private key for Hostinger access
 
-# Build the Docker image if it hasn’t been built already
-./scripts/build-docker-image.sh
+# Directory on the remote server where files should be uploaded
+REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/	
 
-# Log in to Docker Hub using the provided credentials
-echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+# Directory of the build artifacts
+LOCAL_BUILD_DIR=dist/lazy-pro
 
-# Push the Docker image to Docker Hub with the `latest` tag
-docker push $DOCKERHUB_USERNAME/scm-pro:latest
+# Ensure the build is complete before deployment
+if [ ! -d "$LOCAL_BUILD_DIR" ]; then
+  echo "Build directory $LOCAL_BUILD_DIR does not exist. Please build the project first."
+  exit 1
+fi
 
-# Connect to the EC2 instance and deploy the Docker image
-ssh -i "$EC2_SSH_KEY" "$EC2_USER@$EC2_HOST" << 'EOF'
-  # Pull the latest Docker image from Docker Hub
-  docker pull $DOCKERHUB_USERNAME/scm-pro:latest
-  
-  # Stop and remove any running container that uses the old image
-  docker stop $(docker ps -q --filter ancestor=$DOCKERHUB_USERNAME/scm-pro:latest) || true
-  
-  # Run a new container with the latest image, mapping port 80
-  docker run -d -p 80:80 $DOCKERHUB_USERNAME/scm-pro:latest
-EOF
+# Copy build artifacts to the remote server
+scp -i "$SSH_KEY" -r "$LOCAL_BUILD_DIR"/* "$USER@$HOST:$REMOTE_DIR"
+
+# Optional: Add commands to restart services or perform other tasks if necessary
+# Example: Restarting Apache or Nginx on Hostinger (if applicable)
+# ssh -i "$SSH_KEY" "$USER@$HOST" "sudo systemctl restart apache2"  # For Apache
+# ssh -i "$SSH_KEY" "$USER@$HOST" "sudo systemctl restart nginx"   # For Nginx

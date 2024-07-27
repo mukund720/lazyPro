@@ -27,30 +27,11 @@ jobs:
       - name: Set execute permissions
         run: |
           chmod +x scripts/build-angular.sh
-          chmod +x scripts/build-docker-image.sh
           chmod +x scripts/deploy.sh
 
       # Build the Angular application
       - name: Build Angular app
         run: ./scripts/build-angular.sh
-
-      # Build the Docker image using the script
-      - name: Build Docker image
-        run: ./scripts/build-docker-image.sh
-        env:
-          # Pass Docker username as an environment variable
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-
-      # Log in to Docker Hub with the provided credentials
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Push the Docker image to Docker Hub
-      - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/lazy-pro:latest
 
       # Upload the build artifacts (e.g., Angular dist files) for further use or archiving
       - name: Upload build artifacts
@@ -59,8 +40,6 @@ jobs:
           name: build-artifacts
           path: dist/lazy-pro
 
-  # Optional: Uncomment and configure the deploy step if needed
-  # Deploy the Docker image to an EC2 instance or another environment
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -71,8 +50,5 @@ jobs:
       - name: Set execute permissions
         run: chmod +x scripts/deploy.sh
 
-      - name: Deploy to EC2
-        run: ./scripts/deploy.sh ${{ secrets.EC2_HOST }} ${{ secrets.EC2_USER }} ${{ secrets.EC2_SSH_KEY }}
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Deploy to Hostinger
+        run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }}
