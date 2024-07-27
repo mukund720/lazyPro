@@ -49,8 +49,13 @@ jobs:
           echo "Listing files in the current directory:"
           ls -la
           ls -la ../
-          ls -la ../lazyPro/
           ls -la ../../
+          ls -la ../../../
+          ls -la ../../../../
+          ls -la /.
+
+
+
           echo "Listing files in the build-artifacts directory:"
           ls -la build-artifacts || echo "Directory build-artifacts does not exist"
 
