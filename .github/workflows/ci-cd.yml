@@ -53,7 +53,7 @@ jobs:
           ls -la ../../../
           ls -la ../../../../
           ls -la /.
-          ls -la /home/runner/work/lazyPro/lazyPro
+          ls -la /home/runner/work/lazyPro/lazyPro/dist/lazy-pro
 
 
 
