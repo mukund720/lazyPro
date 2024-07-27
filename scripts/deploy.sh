@@ -11,12 +11,12 @@ SSH_KEY=$3      # Path to the SSH private key for Hostinger access
 # Directory on the remote server where files should be uploaded
 REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/cicd	
 
-# Directory of the build artifacts
-LOCAL_BUILD_DIR=dist/lazy-pro
+# Directory of the build artifacts (downloaded by GitHub Actions)
+LOCAL_BUILD_DIR=build-artifacts/lazy-pro
 
-# Ensure the build is complete before deployment
+# Ensure the build artifacts exist
 if [ ! -d "$LOCAL_BUILD_DIR" ]; then
-  echo "Build directory $LOCAL_BUILD_DIR does not exist. Please build the project first."
+  echo "Build directory $LOCAL_BUILD_DIR does not exist. Please check the build process."
   exit 1
 fi
 
