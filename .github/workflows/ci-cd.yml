@@ -35,6 +35,8 @@ jobs:
 
       - name: Fetch artifact URL
         id: fetch-artifact-url
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ARTIFACT_ID=$(gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[0].id')
           ARTIFACT_URL=$(gh api /repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}/zip --jq '.url')
