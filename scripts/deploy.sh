@@ -7,6 +7,8 @@ set -ex
 HOST=$1         # Hostinger hostname or IP
 USER=$2         # Hostinger user (e.g., cpanel_username)
 SSH_KEY=$3      # Path to the SSH private key for Hostinger access
+PORT=$4         # Port number for SSH
+
 
 # Directory on the remote server where files should be uploaded
 REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/cicd	
@@ -33,6 +35,6 @@ ls -la "$LOCAL_BUILD_DIR"
 
 # Copy build artifacts to the remote server
 echo "Copying build artifacts to $USER@$HOST:$REMOTE_DIR..."
-scp -i "$SSH_KEY" -r "$LOCAL_BUILD_DIR"/* "$USER@$HOST:$REMOTE_DIR"
+scp -i "$SSH_KEY" -P "$PORT" -r "$LOCAL_BUILD_DIR"/* "$USER@$HOST:$REMOTE_DIR"
 
 echo "Deployment to Hostinger completed successfully."

@@ -53,6 +53,7 @@ jobs:
           ls -la ../../../
           ls -la ../../../../
           ls -la /.
+          ls -la /home/runner/work/lazyPro/lazyPro
 
 
 
@@ -63,7 +64,7 @@ jobs:
         run: chmod +x scripts/deploy.sh
 
       - name: Deploy to Hostinger
-        run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }}
+        run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }} ${{secrets.HOSTINGER_PORT}}
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
