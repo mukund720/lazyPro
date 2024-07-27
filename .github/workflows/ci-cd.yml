@@ -36,25 +36,32 @@ jobs:
       - name: Fetch artifact URL
         id: fetch-artifact-url
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Fetching artifact information..."
-          # Check available artifacts for the current workflow run
-          gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts'
           
-          # Get the artifact ID from the API response
-          ARTIFACT_ID=$(gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[0].id')
+          # Get the list of artifacts for the current workflow run
+          ARTIFACTS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
+
+          echo "Artifacts: $ARTIFACTS"
+
+          # Extract artifact ID from the response
+          ARTIFACT_ID=$(echo "$ARTIFACTS" | jq -r '.artifacts[0].id')
           echo "Artifact ID: $ARTIFACT_ID"
-          
+
           if [ -z "$ARTIFACT_ID" ]; then
             echo "Artifact ID not found. Exiting."
             exit 1
           fi
 
           # Get the artifact download URL
-          ARTIFACT_URL=$(gh api /repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}/zip --jq '.url')
+          ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}/zip" \
+            | jq -r '.url')
+
           echo "Artifact URL: $ARTIFACT_URL"
-          
+
           if [ -z "$ARTIFACT_URL" ]; then
             echo "Artifact URL not found. Exiting."
             exit 1
@@ -73,7 +80,7 @@ jobs:
       - name: Download build artifacts
         run: |
           echo "Downloading artifact from ${{ env.ARTIFACT_URL }}..."
-          wget ${{ env.ARTIFACT_URL }} -O artifact.zip
+          curl -L ${{ env.ARTIFACT_URL }} -o artifact.zip
           
       - name: List downloaded files
         run: |
