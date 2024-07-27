@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Exit on error
-set -e
+# Exit on error and print commands
+set -ex
 
 # Variables for Hostinger deployment
 HOST=$1         # Hostinger hostname or IP
@@ -14,16 +14,32 @@ REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/cicd
 # Directory of the build artifacts (downloaded by GitHub Actions)
 LOCAL_BUILD_DIR=build-artifacts/lazy-pro
 
+# Debug: Print the values of variables
+echo "Deploying to Hostinger..."
+echo "Host: $HOST"
+echo "User: $USER"
+echo "Remote Directory: $REMOTE_DIR"
+echo "Local Build Directory: $LOCAL_BUILD_DIR"
+
 # Ensure the build artifacts exist
 if [ ! -d "$LOCAL_BUILD_DIR" ]; then
   echo "Build directory $LOCAL_BUILD_DIR does not exist. Please check the build process."
   exit 1
 fi
 
+# List contents of the build artifacts directory for debugging
+echo "Contents of $LOCAL_BUILD_DIR:"
+ls -la "$LOCAL_BUILD_DIR"
+
 # Copy build artifacts to the remote server
+echo "Copying build artifacts to $USER@$HOST:$REMOTE_DIR..."
 scp -i "$SSH_KEY" -r "$LOCAL_BUILD_DIR"/* "$USER@$HOST:$REMOTE_DIR"
 
 # Optional: Add commands to restart services or perform other tasks if necessary
 # Example: Restarting Apache or Nginx on Hostinger (if applicable)
+# echo "Restarting Apache on Hostinger..."
 # ssh -i "$SSH_KEY" "$USER@$HOST" "sudo systemctl restart apache2"  # For Apache
+# echo "Restarting Nginx on Hostinger..."
 # ssh -i "$SSH_KEY" "$USER@$HOST" "sudo systemctl restart nginx"   # For Nginx
+
+echo "Deployment to Hostinger completed successfully."
