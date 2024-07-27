@@ -12,7 +12,7 @@ SSH_KEY=$3      # Path to the SSH private key for Hostinger access
 REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/cicd	
 
 # Directory of the build artifacts (downloaded by GitHub Actions)
-LOCAL_BUILD_DIR=build-artifacts
+LOCAL_BUILD_DIR=build-artifacts/lazy-pro
 
 # Debug: Print the values of variables
 echo "Deploying to Hostinger..."

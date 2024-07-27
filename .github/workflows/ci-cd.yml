@@ -39,13 +39,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set execute permissions
-        run: chmod +x scripts/deploy.sh
-
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
+
+      - name: List build artifacts directory
+        run: ls -la build-artifacts
+
+      - name: Set execute permissions
+        run: chmod +x scripts/deploy.sh
 
       - name: Deploy to Hostinger
         run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }}
