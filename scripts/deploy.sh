@@ -9,7 +9,7 @@ EC2_USER=$2      # EC2 user (e.g., ec2-user or ubuntu)
 EC2_SSH_KEY=$3   # Path to the SSH private key for EC2 access
 
 # Build the Docker image if it hasn’t been built already
-./build-docker-image.sh
+./scripts/build-docker-image.sh
 
 # Log in to Docker Hub using the provided credentials
 echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
