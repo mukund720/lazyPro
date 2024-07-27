@@ -9,7 +9,7 @@ USER=$2         # Hostinger user (e.g., cpanel_username)
 SSH_KEY=$3      # Path to the SSH private key for Hostinger access
 
 # Directory on the remote server where files should be uploaded
-REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/	
+REMOTE_DIR=/home/$USER/domains/theusalocalnews.com/public_html/cicd	
 
 # Directory of the build artifacts
 LOCAL_BUILD_DIR=dist/lazy-pro
