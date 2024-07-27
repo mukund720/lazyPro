@@ -48,23 +48,17 @@ jobs:
         run: |
           echo "Listing files in the current directory:"
           ls -la
-          ls -la ../
-          ls -la ../../
-          ls -la ../../../
-          ls -la ../../../../
-          ls -la /.
-          ls -la /home/runner/work/lazyPro/lazyPro/
 
+          echo "Searching for build-artifacts directory:"
+          find . -type d -name 'build-artifacts' || echo "Directory build-artifacts does not exist"
+          find . -type d -name 'dist' || echo "Directory dist does not exist"
 
-
-          echo "Listing files in the build-artifacts directory:"
-          ls -la build-artifacts || echo "Directory build-artifacts does not exist"
 
       - name: Set execute permissions
         run: chmod +x scripts/deploy.sh
 
       - name: Deploy to Hostinger
-        run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }} ${{secrets.HOSTINGER_PORT}}
+        run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }} ${{ secrets.HOSTINGER_PORT }}
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
