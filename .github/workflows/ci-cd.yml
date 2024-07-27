@@ -38,8 +38,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Get the artifact ID
           ARTIFACT_ID=$(gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[0].id')
+          echo "Artifact ID: $ARTIFACT_ID"
+
+          # Get the artifact download URL
           ARTIFACT_URL=$(gh api /repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}/zip --jq '.url')
+          echo "Artifact URL: $ARTIFACT_URL"
+
+          # Set the environment variable for use in the deploy job
           echo "ARTIFACT_URL=$ARTIFACT_URL" >> $GITHUB_ENV
 
   deploy:
@@ -65,7 +72,11 @@ jobs:
         run: chmod +x scripts/deploy.sh
 
       - name: Deploy to Hostinger
-        run: ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }} ${{ secrets.HOSTINGER_PORT }} ${{ env.ARTIFACT_URL }}
+        run: |
+          echo "Downloading artifact from ${{ env.ARTIFACT_URL }}..."
+          wget ${{ env.ARTIFACT_URL }} -O artifact.zip
+          echo "Deploying artifact..."
+          ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }} ${{ secrets.HOSTINGER_PORT }} artifact.zip
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
