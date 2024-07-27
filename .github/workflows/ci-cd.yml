@@ -38,13 +38,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get the artifact ID
+          echo "Fetching artifact information..."
+          # Check available artifacts for the current workflow run
+          gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts'
+          
+          # Get the artifact ID from the API response
           ARTIFACT_ID=$(gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[0].id')
           echo "Artifact ID: $ARTIFACT_ID"
+          
+          if [ -z "$ARTIFACT_ID" ]; then
+            echo "Artifact ID not found. Exiting."
+            exit 1
+          fi
 
           # Get the artifact download URL
           ARTIFACT_URL=$(gh api /repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}/zip --jq '.url')
           echo "Artifact URL: $ARTIFACT_URL"
+          
+          if [ -z "$ARTIFACT_URL" ]; then
+            echo "Artifact URL not found. Exiting."
+            exit 1
+          fi
 
           # Set the environment variable for use in the deploy job
           echo "ARTIFACT_URL=$ARTIFACT_URL" >> $GITHUB_ENV
@@ -57,24 +71,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifacts
-
+        run: |
+          echo "Downloading artifact from ${{ env.ARTIFACT_URL }}..."
+          wget ${{ env.ARTIFACT_URL }} -O artifact.zip
+          
       - name: List downloaded files
         run: |
           echo "Listing files in the current directory:"
           ls -la
-          echo "Listing files in the build-artifacts directory:"
-          find . -type d -name 'build-artifacts' -exec ls -la {} \; || echo "Directory build-artifacts does not exist"
+          echo "Listing files in the downloaded artifact zip:"
+          unzip -l artifact.zip
 
       - name: Set execute permissions
         run: chmod +x scripts/deploy.sh
 
       - name: Deploy to Hostinger
         run: |
-          echo "Downloading artifact from ${{ env.ARTIFACT_URL }}..."
-          wget ${{ env.ARTIFACT_URL }} -O artifact.zip
           echo "Deploying artifact..."
           ./scripts/deploy.sh ${{ secrets.HOSTINGER_HOST }} ${{ secrets.HOSTINGER_USER }} ${{ secrets.HOSTINGER_SSH_KEY }} ${{ secrets.HOSTINGER_PORT }} artifact.zip
         env:
